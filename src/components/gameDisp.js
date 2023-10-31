@@ -132,11 +132,16 @@ export default function GameDisp({ newNoti }) {
 
   return (
     <div className="gameDisp">
-      <p>Score: {score}</p>
-      <button onClick={easyMode}>Toggle hints</button>
-      <button onClick={endGame}>End game</button>
-      <label htmlFor="player">Player Name: </label>
-      <input value={player === undefined ? "" : player} onChange={getName} />
+      <div className="score">
+        <label htmlFor="player">Player Name: </label>
+        <input value={player === undefined ? "" : player} onChange={getName} name='player' />
+        <p>Score: {score}</p>
+        <button onClick={easyMode}>Toggle hints</button>
+        <button className="refresh" onClick={refresh}>
+            skip
+          </button>
+        <button onClick={endGame}>End game</button>
+      </div>
       <div className="imgView">
         <p>Image: {filename}</p>
         <img
@@ -144,25 +149,26 @@ export default function GameDisp({ newNoti }) {
           onClick={handleGuess}
           alt="Image for guessing game"
         />
-        <button className="refresh" onClick={refresh}>
-          Refresh
-        </button>
-        <p>Current position:</p>
-        <p>
-          X: {guess[0]}, Y: {guess[1]}
-        </p>
-        <input
-          value={charGuess}
-          list="chars"
-          onChange={handleInput}
-          hidden={inputDisp}
-        />
-        <datalist id="chars" hidden={inputDisp || !easy}>
-          {options}
-        </datalist>
-        <button hidden={inputDisp} onClick={handleSubmit}>
-          Submit
-        </button>
+      </div>
+      <div className="answers">
+          <p>Current position:</p>
+          <p>
+            X: {guess[0]}, Y: {guess[1]}
+          </p>
+          <label htmlFor="guess" hidden={inputDisp}>Who's that??</label>
+          <input
+            value={charGuess}
+            name="guess"
+            list="chars"
+            onChange={handleInput}
+            hidden={inputDisp}
+          />
+          <datalist id="chars" hidden={inputDisp || !easy}>
+            {options}
+          </datalist>
+          <button hidden={inputDisp} onClick={handleSubmit}>
+            Submit
+          </button>
       </div>
     </div>
   );
