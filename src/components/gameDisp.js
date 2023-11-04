@@ -12,6 +12,7 @@ export default function GameDisp({ newNoti }) {
   const [score, setScore] = useState(0);
   const [easy, setEasy] = useState(false);
   const [player, setPlayer] = useState(undefined);
+  const [imgSize, setImgSize] = useState([])
 
   const fetchList = async () => {
     const images = await serverReqs.getImageList();
@@ -25,11 +26,10 @@ export default function GameDisp({ newNoti }) {
     console.log(imgArr)
     newNoti(`${imgArr.length} pulled from database`, 'win')
     setImageList(imgArr);
-    console.log(imageList)
-    return
   };
 
   const fetchImg = async () => {
+    if (imageList.length < 1) return
     const rand = Math.floor(Math.random() * (imageList.length - 1));
     console.log(`random: ${rand}`)
     const id = imageList[rand]._id;
@@ -43,7 +43,6 @@ export default function GameDisp({ newNoti }) {
     setImageUrl(url);
     setImgId(id);
     newNoti('Game starting..', 'win')
-    return
   };
 
 
@@ -61,10 +60,21 @@ export default function GameDisp({ newNoti }) {
       }
     }
     first()
+
+    //cleanup
+    return () => {
+      setImageList([])
+    }
   }, []);
 
   useEffect(() => {
     fetchImg()
+
+    //cleanup
+    return () => {
+      setImageUrl(null)
+      setImgId('')
+    }
   }, [imageList])
 
   function refresh() {
@@ -84,9 +94,15 @@ export default function GameDisp({ newNoti }) {
   }
 
   function handleGuess(e) {
-    console.log(`X: ${e.pageX}, Y: ${e.pageY}`)
+    console.log(`X: ${e.target.clientWidth}, Y: ${e.target.clientHeight}`)
+    setImgSize([e.target.clientWidth, e.target.clientHeight])
     setGuess([e.nativeEvent.offsetX, e.nativeEvent.offsetY]);
     setInputDisp(false);
+  }
+
+  function convertVal(x, y) {
+    //convert click position based on img resizing
+
   }
 
   async function easyMode() {
@@ -99,7 +115,8 @@ export default function GameDisp({ newNoti }) {
         return
       }
       newNoti('Hints on', 'win')
-      setCharList([...chars]);
+      console.log(chars)
+      setCharList([...chars.options]);
     } else {
       setEasy(false)
       newNoti('Hints off', 'win')
@@ -117,8 +134,8 @@ export default function GameDisp({ newNoti }) {
     const body = {
       id: imgId,
       name: charGuess,
-      x: guess[0],
-      y: guess[1],
+      guess,
+      size: imgSize,
     };
     const response = await serverReqs.submitGuess(body);
     if (response.err) {
@@ -173,6 +190,7 @@ export default function GameDisp({ newNoti }) {
       </div>
       <div className="imgView">
         <p>Image: {imgId}</p>
+        <p>Hints are {easy ? 'on' : 'off'}</p>
         <img
           src={imageUrl}
           onClick={(e) => handleGuess(e)}

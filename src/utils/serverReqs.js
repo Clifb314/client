@@ -41,11 +41,10 @@ class ServerAccess {
     async getHints(id) {
         const url = APIurl + 'hints'
         try {
-            console.log(id)
             const response = await fetch(url, {
                 method: 'POST',
                 mode: 'cors',
-                body: id,
+                body: JSON.stringify(id),
                 headers: {
                     'Content-Type': 'application/json'
                 }
