@@ -8,9 +8,14 @@ export default function Scoreboard() {
     const getScores = async () => {
       try {
         const reqScores = await serverReqs.getScores();
-        setScores([...reqScores]);
-      } catch {
-        //toast noti?
+        const set = reqScores.scores
+        for (const score of set) {
+          const setDate = new Date(score.date).toLocaleString()
+          score.date = setDate
+        }
+        setScores([...set]);
+      } catch(err) {
+        console.log(err)
       }
     };
     getScores();
@@ -29,10 +34,15 @@ export default function Scoreboard() {
   return (
     <div className="scoreboard">
       <table>
-        <th>Player</th>
-        <th>Score</th>
-        <th>Date</th>
-        {display}
+        <caption>Scoreboard</caption>
+        <thead>
+          <tr>
+            <th scope="col">Player</th>
+            <th scope="col">Score</th>
+            <th scope="col">Date</th>
+          </tr>
+        </thead>
+        <tbody>{display}</tbody>
       </table>
     </div>
   );

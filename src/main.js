@@ -13,18 +13,20 @@ export default function Main() {
       message: msg,
       type,
     };
-    if (toasts.length < 6) {
-      setToasts((prev) => [newToast, prev]);
+    if (toasts.length < 1) {
+      setToasts([newToast])
+    } else if (toasts.length < 6) {
+      setToasts((prev) => [...prev, newToast]);
     } else {
       let newList = [...toasts];
-      newList.pop();
-      newList.unshift(newToast);
+      newList.shift();
+      newList.push(newToast);
       setToasts(newList);
     }
 
     setTimeout(() => {
       closeToast(newToast.id);
-    }, 5000);
+    }, 50000);
   }
 
   function closeToast(id) {

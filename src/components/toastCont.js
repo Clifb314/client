@@ -9,7 +9,7 @@ export default function ToastCont({ data, remove, closeAll }) {
             key={noti.id}
             message={noti.message}
             type={noti.type}
-            onClose={() => remove(toast.id)}
+            onClose={() => remove(noti.id)}
           />
         ))
       : "";

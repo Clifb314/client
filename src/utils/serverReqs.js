@@ -4,7 +4,7 @@ const APIurl = "http://localhost:5000/api/";
 class ServerAccess {
 
     async getImageList() {
-        url = APIurl + 'list'
+        const url = APIurl + 'list'
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -13,7 +13,7 @@ class ServerAccess {
             if (!response.ok) {
                 throw new Error('Error accessing database')
             } else return await response.json()
-        } catch {
+        } catch (error) {
             console.error('Error', error)
             return {err: 'Could not access image'}
         }
@@ -22,7 +22,7 @@ class ServerAccess {
 
 
     async getImage(id) {
-        url = APIurl + 'list/' + id
+        const url = APIurl + 'list/' + id
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -30,8 +30,8 @@ class ServerAccess {
             })
             if (!response.ok) {
                 throw new Error('Error accessing database')
-            } else return await response.json()
-        } catch {
+            } else return await response.blob()
+        } catch (error) {
             console.error('Error', error)
             return {err: 'Could not access server'}            
         }
@@ -39,17 +39,22 @@ class ServerAccess {
 
 
     async getHints(id) {
-        url = APIurl + 'hints'
+        const url = APIurl + 'hints'
         try {
+            console.log(id)
             const response = await fetch(url, {
-                method: 'GET',
+                method: 'POST',
                 mode: 'cors',
-                body: JSON.stringify(id)
+                body: id,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+
             })
             if (!response.ok) {
                 throw new Error('Error accessing database')
             } else return await response.json()
-        } catch {
+        } catch (error) {
             console.error('Error', error)
             return {err: 'Could not access server'}            
         }
@@ -57,41 +62,47 @@ class ServerAccess {
 
     async submitGuess(guess) {
         //guess should have image id, x+y coordinates
-        url = APIurl + 'answer'
+        const url = APIurl + 'answer'
         try {
             const response = await fetch(url, {
                 method: 'POST',
                 mode: 'cors',
-                body: JSON.stringify(guess)
+                body: JSON.stringify(guess),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             })
             if (!response.ok) {
                 throw new Error('Error accessing database')
             } else return await response.json()
-        } catch {
+        } catch (error) {
             console.error('Error', error)
             return {err: 'Could not access server'}            
         }
     }
 
     async endGame(data) {
-        url = APIurl + 'end-game'
+        const url = APIurl + 'end-game'
         try {
             const response = await fetch(url, {
                 method: 'POST',
                 mode: 'cors',
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             })
             if (!response.ok) {
                 throw new Error('Error accessing database')
             } else return await response.json()
-        } catch {
+        } catch(error) {
             console.error('Error', error)
             return {err: 'Could not access server'}            
         }
     }
 
     async getScores() {
-        url = APIurl + 'scoreboard'
+        const url = APIurl + 'scoreboard'
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -100,7 +111,7 @@ class ServerAccess {
             if (!response.ok) {
                 throw new Error('Error accessing database')
             } else return await response.json()
-        } catch {
+        } catch(error) {
             console.error('Error', error)
             return {err: 'Could not access server'}            
         }
