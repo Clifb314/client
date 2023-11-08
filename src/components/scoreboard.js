@@ -1,5 +1,6 @@
 import { React, useEffect, useState } from "react";
 import serverReqs from "../utils/serverReqs";
+import { v4 as uuidv4 } from "uuid";
 
 export default function Scoreboard() {
   const [scores, setScores] = useState([]);
@@ -23,7 +24,7 @@ export default function Scoreboard() {
 
   const display = scores.map((score) => {
     return (
-      <tr>
+      <tr key={uuidv4()}>
         <td>{score.name}</td>
         <td>{score.score}</td>
         <td>{score.date}</td>
@@ -37,7 +38,7 @@ export default function Scoreboard() {
         <caption>Scoreboard</caption>
         <thead>
           <tr>
-            <th scope="col">Player</th>
+            <th className="player" scope="col">Player</th>
             <th scope="col">Score</th>
             <th scope="col">Date</th>
           </tr>

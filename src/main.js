@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { React, useEffect, useState } from "react";
 import ToastCont from "./components/toastCont";
 import GameDisp from "./components/gameDisp";
 import Scoreboard from "./components/scoreboard";
@@ -15,7 +15,7 @@ export default function Main() {
     };
     if (toasts.length < 1) {
       setToasts([newToast])
-    } else if (toasts.length < 6) {
+    } else if (toasts.length < 3) {
       setToasts((prev) => [...prev, newToast]);
     } else {
       let newList = [...toasts];
@@ -30,13 +30,25 @@ export default function Main() {
   }
 
   function closeToast(id) {
+    if (toasts.length < 2) {
+      setToasts([])
+      return
+    }
     const newList = toasts.filter((toast) => toast.id !== id);
     setToasts(newList);
   }
 
   function closeAllToasts() {
     setToasts([]);
+    console.log(toasts)
   }
+
+  useEffect(() => {
+    addToast('Welcome!', "win")
+
+    return closeAllToasts()
+  }, [])
+
 
   return (
     <div className="main">

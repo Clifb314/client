@@ -1,16 +1,18 @@
 import { React, useEffect, useState } from "react";
 import serverReqs from "../utils/serverReqs";
+import {v4 as uuidv4} from 'uuid'
 
 export default function GameDisp({ newNoti }) {
-  const [imgId, setImgId] = useState("");
   const [imageList, setImageList] = useState([]);
-  const [charList, setCharList] = useState([]);
+  const [remain, setRemain] = useState(null)
+  const [imgId, setImgId] = useState("");
   const [imageUrl, setImageUrl] = useState(null);
+  const [easy, setEasy] = useState(false);
+  const [charList, setCharList] = useState([]);
   const [inputDisp, setInputDisp] = useState(true);
   const [guess, setGuess] = useState([0, 0]);
   const [charGuess, setCharGuess] = useState("");
   const [score, setScore] = useState(0);
-  const [easy, setEasy] = useState(false);
   const [player, setPlayer] = useState(undefined);
   const [imgSize, setImgSize] = useState([])
 
@@ -22,16 +24,14 @@ export default function GameDisp({ newNoti }) {
       newNoti('Error accessing image list', 'fail')
       return
     }
-    const imgArr = images.images
-    console.log(imgArr)
-    newNoti(`${imgArr.length} pulled from database`, 'win')
-    setImageList(imgArr);
+    console.log(images)
+    newNoti(`${images.length} pulled from database`, 'win')
+    setImageList(images);
   };
 
   const fetchImg = async () => {
     if (imageList.length < 1) return
     const rand = Math.floor(Math.random() * (imageList.length - 1));
-    console.log(`random: ${rand}`)
     const id = imageList[rand]._id;
     console.log(`id: ${id}`)
     const img = await serverReqs.getImage(id);
@@ -40,9 +40,10 @@ export default function GameDisp({ newNoti }) {
     }
     //const blob = await img.blob().catch(err => console.error('Error w/ blob', err));
     const url = URL.createObjectURL(img);
+    setRemain(imageList[rand].chars.length)
     setImageUrl(url);
     setImgId(id);
-    newNoti('Game starting..', 'win')
+    newNoti('Game ready', 'win')
   };
 
 
@@ -51,6 +52,7 @@ export default function GameDisp({ newNoti }) {
 
   useEffect(() => {
     const first = async () => {
+      setEasy(false)
       try {
         await fetchList()
         console.log('list acquired')
@@ -77,7 +79,7 @@ export default function GameDisp({ newNoti }) {
     }
   }, [imageList])
 
-  function refresh() {
+  function refresh(bool) {
     if (imageList.length < 2) {
       newNoti('This is the last image. Submit your score!', 'fail')
       return
@@ -86,7 +88,8 @@ export default function GameDisp({ newNoti }) {
     console.log(newList)
     setImageList(newList);
     setInputDisp(true)
-    newNoti('skipping that one..', 'win')
+    const notiMsg = bool ? 'Nice! You got them all!' : 'Skipping that one...'
+    newNoti(notiMsg, 'win')
   }
 
   function handleInput(e) {
@@ -100,11 +103,6 @@ export default function GameDisp({ newNoti }) {
     setInputDisp(false);
   }
 
-  function convertVal(x, y) {
-    //convert click position based on img resizing
-
-  }
-
   async function easyMode() {
     if (!easy) {
       setEasy(true);
@@ -116,7 +114,7 @@ export default function GameDisp({ newNoti }) {
       }
       newNoti('Hints on', 'win')
       console.log(chars)
-      setCharList([...chars.options]);
+      setCharList(chars);
     } else {
       setEasy(false)
       newNoti('Hints off', 'win')
@@ -127,7 +125,7 @@ export default function GameDisp({ newNoti }) {
     easy === false ? (
       <option value="" />
     ) : (
-      charList.map((char) => <option value={char} />)
+      charList.map((char) => <option key={uuidv4()} value={char} />)
     );
 
   async function handleSubmit() {
@@ -144,10 +142,23 @@ export default function GameDisp({ newNoti }) {
     }
     //answer checking
     if (response.result === 1) {
-      //toast noti?
-      newNoti('You got it!', 'win')
+      //resetting
       setScore(score + 1);
-      refresh();
+      setCharGuess('')
+      setInputDisp(true)
+      setGuess([])
+      setImgSize([])
+
+
+      //next image if all chars found
+      if (remain < 2) {
+        setEasy(false)
+        refresh(true);
+      } else {
+        setRemain(remain - 1)
+        newNoti('You got it! Now get the rest', 'win')
+      }
+
     } else if (easy) {
       newNoti(response.hint, 'fail')
     } else {
@@ -172,6 +183,11 @@ export default function GameDisp({ newNoti }) {
       return
     }
     newNoti('Score sent to server. Want to play again?', 'win')
+    setCharGuess('')
+    setInputDisp(true)
+    setGuess([])
+    setImgSize([])
+    setEasy(false)
     setScore(0);
     fetchList();
   }
@@ -183,7 +199,7 @@ export default function GameDisp({ newNoti }) {
         <input value={player === undefined ? "" : player} onChange={getName} name='player' />
         <p>Score: {score}</p>
         <button onClick={easyMode}>Toggle hints</button>
-        <button className="refresh" onClick={refresh}>
+        <button className="refresh" onClick={() => refresh(false)}>
             skip
           </button>
         <button onClick={endGame}>End game</button>
